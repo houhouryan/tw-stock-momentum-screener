@@ -10,51 +10,90 @@
 | 專案代號 | HOTSTOCK-TW |
 | 目標環境 | Linux 單機部署 |
 | Python | 3.12（由 `.python-version` 釘住） |
-| 套件管理 | [uv](https://docs.astral.sh/uv/) |
+| 套件管理 | [uv](https://docs.astral.sh/uv/)；`pyproject.toml` + `uv.lock` 為依賴唯一來源 |
 | 目標交付日 | 2026-12-15 |
 
 ---
 
-## 一、專案現況（2026-08-02）
+## 一、目前執行清單
 
-**專案正在依 [SDD v0.2](docs/台股飆股候選偵測與續航評估系統_SDD_v0_2.md) 進行架構重構。目前的 `src/` 是重構前的舊結構。**
+**本專案目前處於 B0 階段（工程骨架與資料契約）。**
 
-| 元件 | 狀態 | 說明 |
-|---|---|---|
-| 新聞擷取器（`src/db.py`、`src/sources.py`、`src/pipeline.py`、`run_news.py`） | 🟡 可運行，待遷移 | 舊分工下建立；將併入 `src/hotstock/adapters/` 與統一的 PIT schema |
-| 其餘所有模組 | ⬜ 未實作 | 見下方「四、目標架構」 |
+執行順序**以下列檢查報告為準**，不依其他文件：
 
-重構的落點是 SDD §5 的 `src/hotstock/` package 結構。在骨架（B0）完成前，**不要在舊 `src/` 上疊加新功能**。
+> 📋 [`docs/reviews/member-b/20260802-171355_B0規劃與輪次切分_review.md`](docs/reviews/member-b/20260802-171355_B0規劃與輪次切分_review.md)
 
-### 為什麼新聞擷取器要先跑著
+該報告將 B0 切為 **14 個短輪次（B0-R00 ～ B0-R13）**，每輪上限 2～4 小時。強制規則：
 
-歷史財經新聞**無法回補**：舊 URL 大量失效、時間戳多為「最後更新時間」而非首次發布時間、覆蓋率不明（計畫書 §8.5.1）。起爬日直接決定樣本量，**每晚一天就永久少一天**。
+1. 只執行目前被解鎖的輪次
+2. 完成後新增一份工作報告並**停止**
+3. 等待新的檢查報告明確標記 **PASS**，且寫出下一輪 ID，才能繼續
+4. **即使提早完成，也不得順手開始下一輪**
 
-但要注意定位已經改變：SDD 把新聞降為 **D-news 探索性展示**，明確**不影響 P0**，且「沒有合法來源是允許結果」（SDD §1.2、§16.5、§6.3）。所以它值得持續運行以保住樣本，但**不得為它排擠 A／B／B+ 主線**。
+`docs/組員B_B0工作計畫_待審核_v1.md` 已**作廢為歷史規劃**，保留不刪除，但**不再作為執行順序依據**。
 
 ---
 
-## 二、文件與優先序
+## 二、專案現況
+
+| 元件 | 狀態 |
+|---|---|
+| `src/hotstock/`（新系統） | ⬜ 尚未建立，B0-R01 起 |
+| 依賴與品質工具 | ⬜ 尚未建立，B0-R01／R02 |
+| Domain contract | ⬜ 尚未建立，B0-R03～R05 |
+| SourceAdapter 與 fixture | ⬜ 尚未建立，B0-R06 |
+| DB migration（11 表） | ⬜ 尚未建立，B0-R07～R09 |
+| Raw repository、run state、config hash | ⬜ 尚未建立，B0-R10～R12 |
+
+### ⚠️ 關於 repo 內的舊檔案
+
+`src/db.py`、`src/sources.py`、`src/pipeline.py`、`run_news.py`、`requirements.txt`、`config/sources.yaml` 是**新系統定案前**遺留的新聞擷取工具。
+
+| 規則 | 說明 |
+|---|---|
+| **不屬新系統** | 依 [ADR-0001 DEC-002](docs/adr/ADR-0001-B0基線決策.md)，完全不在新主線範圍 |
+| **不得 import** | `src/hotstock/` 內**任何模組都不得 import** 這些檔案 |
+| **不執行、不遷移、不測試** | 不加入依賴，不為其補 lint／型別／測試 |
+| **不刪除** | 依 DEC-003 原樣保留，除非專案經理另行授權 |
+| **品質工具不掃描** | `scripts/check.sh` 只涵蓋新 package、正式 tests 與必要 scripts |
+
+新聞在 SDD 中的定位是 **D-news 探索性展示**，明確**不阻塞 P0**，且「沒有合法來源是允許結果」（SDD §1.2、§16.5）。
+
+---
+
+## 三、文件與優先序
+
+```
+SDD v0.2  >  有效 ADR  >  A／B 工作表  >  專案計畫書 v2.6.2（研究背景）
+```
+
+**SDD 與計畫書衝突時，一律以 SDD 為準**，並同步建立 ADR。不得由個別組員自行選擇有利版本。
 
 | 文件 | 角色 |
 |---|---|
 | [SDD v0.2](docs/台股飆股候選偵測與續航評估系統_SDD_v0_2.md) | **實作契約，最高優先** |
-| [專案計畫書 v2.6.1](docs/台股飆股候選偵測與續航評估系統_專案計畫書_v2_6_1.md) | 研究背景與動機 |
+| [ADR](docs/adr/) | 已核准的決策紀錄；可修訂 SDD 個別條款，須明寫被修訂條號 |
 | [組員 A 工作表](docs/組員A_市場資料與研究工作表.md) | 市場資料與研究分工 |
 | [組員 B 工作表](docs/組員B_系統實驗與模型工作表.md) | 系統、實驗與模型分工 |
+| [專案計畫書 v2.6.2](docs/台股飆股候選偵測與續航評估系統_專案計畫書_v2_6_2.md) | 研究背景與動機 |
+| [檢查報告](docs/reviews/member-b/) | 輪次解鎖與修改指南 |
+| [工作報告](docs/工作報告/) | 每輪規劃與執行紀錄 |
 
-**衝突時一律以 SDD 為準**，並同步建立變更紀錄（SDD §文件優先序）。不得由個別組員自行選擇有利版本。
+### 分工以工作表為準
 
-### 兩個已知的文件落差，動手前務必知道
+**最新 A／B 工作表取代計畫書 v2.6.2 §17 的舊分工**（[ADR-0001 DEC-005](docs/adr/ADR-0001-B0基線決策.md)）。
 
-1. **分工已對調。** 計畫書 v2.6.1 §17 寫「A＝資料與系統工程（含新聞爬蟲）、B＝研究/消息/評估」；但**最新的兩份工作表**寫「A＝市場資料與研究、B＝系統/實驗/模型」。**以工作表為準**，計畫書 §17 已失效。
-2. **SDD 宣稱依據計畫書 v2.6.2，但本 repo 只有 v2.6.1。** 引用計畫書條號時請自行確認該條在 SDD 中是否已被覆寫。
+計畫書 §17 寫「A＝資料與系統工程、B＝研究／消息／評估」，方向與現行分工**相反**，該節已作廢，不得引用。
 
-任何決策異動都必須新增 ADR（`docs/adr/`），記錄日期、理由、影響範圍與核准人。
+### 決策流程
+
+- **沉默不是核准。** 不得使用「期限前沒有收到反對就視為核准」。
+- 會改變需求、資料契約、研究方法、成本、外部服務、時程或驗收標準的選擇，一律**停止該輪**並列為待決事項。
+- 純局部、可逆且不改公開契約的實作細節可自行提出方案，但仍須在工作報告說明。
 
 ---
 
-## 三、環境設定
+## 四、環境設定
 
 ### 需求
 
@@ -67,32 +106,22 @@
 ```bash
 git clone <repo-url> hotstock-tw
 cd hotstock-tw
-
-# 建立虛擬環境（uv 會依 .python-version 自動取用 Python 3.12）
-uv venv
+uv venv          # 依 .python-version 自動取用 Python 3.12
 ```
 
-### 執行
-
-一律用 `uv run`，不需要手動 `activate`，也不會誤用到系統 Python：
-
-```bash
-uv run python run_news.py     # 執行一次新聞抓取（舊結構）
-```
-
-> **⏳ 待完成（B0-01）：** 依賴目前還在 `requirements.txt`，尚未移入 `pyproject.toml`，因此 `uv run` / `uv sync` 尚未能自動裝齊套件，也還沒有 `uv.lock`。此項完成後本節指令才會在乾淨環境一次到位。
+> **⏳ B0-R01 前尚不可用：** `pyproject.toml` 目前只有專案 metadata，尚未加入任何依賴，也還沒有 `uv.lock`。`uv sync` 與 `uv run` 要等 B0-R01 完成後才能正常運作，屆時本節指令會經實測後更新。
 
 ### 產生的檔案（皆已 gitignore）
 
 | 路徑 | 內容 |
 |---|---|
+| `.venv/` | 虛擬環境 |
 | `data/` | SQLite 資料庫 |
 | `logs/` | 執行日誌 |
-| `.venv/` | 虛擬環境 |
 
 ---
 
-## 四、目標架構（SDD §5）
+## 五、目標架構（SDD §5）
 
 ### 分層
 
@@ -139,26 +168,36 @@ hotstock-tw/
 │  ├─ product/                   B   cards、narratives、scorecard、notifications
 │  └─ web/                       B   app、routes、templates、static
 ├─ deploy/                       B   systemd units、nginx.example.conf
-├─ scripts/
+├─ scripts/                      B
 ├─ tests/
 │  ├─ unit/  fixtures/           A
 │  └─ integration/  leakage/  regression/       B
 └─ docs/
    ├─ adr/                       共同
+   ├─ reviews/                   審查者
+   ├─ 工作報告/                   B
    ├─ data_dictionary.md         A（技術欄位由 B 補）
    ├─ source_registry.md         A
    └─ runbook.md                 B
 ```
 
+### B0 只建立 11 張表
+
+依 [ADR-0001 DEC-009](docs/adr/ADR-0001-B0基線決策.md)，B0 **不一次實作 SDD §8.2 的全部 23 張表**，只建立會被 B0 與 A1 消費的 11 張：
+
+`schema_migration`、`source_registry`、`license_snapshot`、`source_artifact`、`pipeline_run`、`run_input_artifact`、`active_run`、`security_master_scd`、`trading_calendar`、`daily_price`、`market_index`
+
+其餘表**不得先放空殼**，一律在首個消費它的 Slice 以新的 forward migration 加入。**禁止修改已套用的 migration。**
+
 ---
 
-## 五、動手前必讀：不可違反的設計約束
+## 六、動手前必讀：不可違反的設計約束
 
 以下每一條都對應 SDD 的明文規定與驗收項目。違反其中任一條，等於整份研究結論失效。
 
 ### PIT（時點正確）
 
-1. **雙時間並存，不得互相覆蓋**（DD-013）。`system_available_from` = `first_seen_at`，用於正式前瞻、replay 與 scorecard；`public_available_from` = `published_at`，**只能**用於明確標記 `public_pit` 的歷史研究 view。每筆 Feature／Candidate 必須保存 `pit_mode`，正式產品只允許 `system`。
+1. **雙時間並存，不得互相覆蓋**（DD-013）。`system_available_from` = `first_seen_at`，用於正式前瞻、replay 與 scorecard；`public_available_from` = `published_at`，**只能**用於明確標記 `public_pit` 的歷史研究 view。每筆 Feature／Candidate 必須保存 `pit_mode`，正式產品只允許 `system`。**不得以 `max()` 之類的方式把兩者合併成單一欄位。**
 2. **21:25 manifest 凍結。** 之後才抓到的資料，即使 `published_at` 更早，也不得進入當日正式 run。
 3. **決策層不得讀取決策時間之後才可得的資料。** `PIT_VIOLATION` 是最高嚴重度錯誤，立即中止。
 
@@ -177,7 +216,7 @@ hotstock-tw/
 ### 缺值與降級
 
 10. **unavailable ≠ strength 0。** 未觸發是 0，不可得是 null。補 0.5 只允許作敏感度分析，**不得進正式排名**。
-11. **降級是三個正交欄位**：`phase`（執行階段）、`outcome`（RUNNING/SUCCEEDED/SUCCEEDED_WITH_WARNINGS/FAILED）、`degraded_modes[]`（字串陣列，可同時多值）。`DEGRADED` 不是執行階段。
+11. **降級是三個正交欄位**：`phase`（執行階段）、`outcome`（RUNNING/SUCCEEDED/SUCCEEDED_WITH_WARNINGS/FAILED）、`degraded_modes[]`（字串陣列，可同時多值）。`DEGRADED` 不是執行階段，`SUPERSEDED` 不是 run status。
 12. **核心價量缺漏 → run FAILED，不輸出。** 籌碼／公告／主題缺漏 → 降級並標記，主線續行。
 
 ### 研究誠信
@@ -190,7 +229,7 @@ hotstock-tw/
 
 ---
 
-## 六、每日正式時序（Asia/Taipei）
+## 七、每日正式時序（Asia/Taipei）
 
 | 時間 | 動作 |
 |---|---|
@@ -206,7 +245,7 @@ hotstock-tw/
 
 ---
 
-## 七、CLI（規劃中，尚未實作）
+## 八、CLI（規劃中，尚未實作）
 
 ```bash
 hotstock db migrate
@@ -226,50 +265,17 @@ hotstock web serve
 
 所有可寫入命令支援 `--dry-run`、`--run-id`、`--log-level`、`--config`。回補命令支援 checkpoint——**不得因第 500 天失敗而重抓前 499 天**。
 
----
-
-## 八、既有新聞擷取器
-
-### 用法
-
-```bash
-uv run python run_news.py
-```
-
-看到 `來源 yahoo_tw_market：抓到 N 則，新增 N 則` 即成功。第二次執行新增數會下降或為 0，代表 `url_hash` 去重生效（冪等）。
-
-新增來源只需編輯 `config/sources.yaml` 的 `sources:` 區塊，程式不用改。**加來源前務必先確認該網站的 robots.txt 與使用條款。**
-
-### ⚠️ 已知規格偏差（重構時必須一併修正）
-
-目前 schema 是在 SDD 定案前寫的，與 SDD §7.1–7.2 及計畫書 §8.5.4 有結構性落差：
-
-| 項目 | 現況 | 應為 |
-|---|---|---|
-| PIT 時間 | 單一 `available_from = max(published_at, fetched_at)` | **分開保存** `system_available_from`(=first_seen_at) 與 `public_available_from`(=published_at)，不得互相覆蓋 |
-| 發布時間 | 只存解析後的 `published_at` | `published_at_raw`（頁面原樣，**不解析**）＋ `published_at_parsed`（可為 null） |
-| run 關聯 | `news_raw` 無欄位指向 `crawl_run` | 需 `retrieved_run_id` |
-| 內容 | 只有 `summary` | 需 `body` 與 `raw_html` |
-| `content_hash` | 標題＋摘要的 hash | SDD 定義為**原始 bytes** 的 SHA-256（語意衝突，需改名區分） |
-
-取 `max()` 的方向是保守的（延後可用時間），**因此不構成 leakage**，但欄位形狀不符雙 PIT 要求。
-
-### 每天要確認的一件事
-
-**資料有沒有斷。** 斷線區間是永久性的資料損失，且**不得補假資料**（計畫書 R01）。
-
-```bash
-uv run python -c "
-import sqlite3
-c = sqlite3.connect('data/news.db')
-for r in c.execute('SELECT started_at,source_id,status,items_new FROM crawl_run ORDER BY id DESC LIMIT 10'):
-    print(r)
-"
-```
+B0 只實作 `hotstock db migrate`（B0-R07）。
 
 ---
 
 ## 九、開發流程
+
+### 一輪一停
+
+見 §一。**未取得 PASS 前不得開始下一輪**，即使本輪提早完成。
+
+遇到決策或阻塞時：立即停止 → 工作報告狀態標 `BLOCKED` → 說明背景、選項、影響與建議 → 不開始下一輪。**不自行採用預設方案。**
 
 ### 每週節奏
 
@@ -284,8 +290,6 @@ for r in c.execute('SELECT started_at,source_id,status,items_new FROM crawl_run 
 阻塞超過一個工作日，須在 issue 寫明原因、已嘗試方法、需對方提供的具體輸入，以及**是否影響 9/20、11/20 或 12/15 里程碑**。
 
 ### Definition of Done
-
-一項工作同時滿足以下才可標完成：
 
 - 程式、型別、migration／設定、測試與文件同步更新
 - 可由 CLI 或自動測試離線重現，不依賴 Notebook 隱藏狀態
@@ -306,21 +310,22 @@ for r in c.execute('SELECT started_at,source_id,status,items_new FROM crawl_run 
 | 8/20 | 單日垂直切片：固定 fixture 走到 Candidate JSON 與首頁 | |
 | 8/31 | 歷史資料四項關卡 | |
 | **9/20** | **凍結研究協定**（假設、Label、切分、指標、候選訊號清單） | ✅ |
+| 9/21–11/4 | B4：**最小 systemd 可運行版本須於此階段產出**（DEC-011） | |
 | 11/5 | validation 解鎖，**只開一次** | ✅ |
+| ~11/19 | systemd 須穩定運行，方能於 12/3 達成 SD-AC07 | |
 | **11/20** | **`config-final` 與 `config_hash` 凍結**；之後 holdout 解鎖只評估一次 | ✅ |
 | 12/1 | 正式資料截止 | |
 | 12/3 | 最早可達成 SD-AC07（連續 10 交易日無人工介入） | |
 | 12/15 | 交付 | |
 
-> ⏰ 從 12/3 倒推 10 個交易日，**systemd 排程必須在 11/19 前上線並穩定運行**。
-
 ---
 
-## 十一、資料來源與標示義務
+## 十一、資料來源與安全
 
 - 外部來源資料一律視為**不可信輸入**，必須經 Schema、型別、範圍與時點驗證。
-- 來源未完成 `source_registry` 登錄、或條款已過檢查有效期時，**Adapter 不得正式啟用**。
-- **密鑰不得寫入 Git、資料庫輸出或前端 HTML**，也不得寫入日誌。
-- Yahoo 股市 RSS 條款要求標示資料來源為「Yahoo股市」，且不得修改各則訊息標題中附帶的資訊來源。程式已將來源名稱存於 `source_name`，**UI 顯示新聞時必須一併顯示此欄位**。
+- 來源未完成 `source_registry` 登錄、或 `license_snapshot` 條款已過檢查有效期時，**Adapter 不得正式啟用**。
+- Raw 檔案存檔案系統，**資料庫只存 metadata 與 URI**；Raw 不得因後續 normalize 或公司行動被覆寫。
+- **密鑰不得寫入 Git、資料庫輸出、前端 HTML 或日誌。**
+- Web UI 為唯讀展示，不得提供修改權重、訊號或資料的入口。
 
 本專案為非營利學術用途。
