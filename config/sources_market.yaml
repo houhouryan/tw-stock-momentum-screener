@@ -56,7 +56,12 @@ sources:
     expected_fields: []             # 探測後填入
     verified: false
     verified_at: null
-    notes: "C01/C02 訊號來源。須確認公布時間（影響 21:25 擷取截止）。"
+    status: unavailable_with_alternative
+    notes: |
+     2026-08-02 探測失敗：HTTP 200 但回傳非 JSON（推測路徑已變更或不存在）。
+     **決定不繼續追查** —— www.twse.com.tw/fund/T86 已完全涵蓋其功能
+     且額外支援歷史查詢（date 參數），故本端點無獨有價值。
+     若日後需要，可至 https://openapi.twse.com.tw/ 的 Swagger UI 查正確路徑。
 
   - id: twse_openapi_bwibbu_all
     name: "臺灣證券交易所"
