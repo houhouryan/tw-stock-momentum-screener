@@ -4,7 +4,7 @@
 
 **測試只涵蓋新系統 `src/hotstock/`。**
 
-舊的 `src/db.py`、`src/sources.py`、`src/pipeline.py`、`run_news.py` 依 [ADR-0001 DEC-002](../docs/adr/ADR-0001-B0基線決策.md) 不屬新主線，**不掃描、不測試、不為其補 lint 或型別**。
+legacy 新聞爬蟲已依 [ADR-0002](../docs/adr/ADR-0002-移除legacy新聞爬蟲.md) 移除。歷史工作報告與檢查報告可能保留舊路徑作稽核證據，但不屬測試輸入。
 
 ## 目錄
 

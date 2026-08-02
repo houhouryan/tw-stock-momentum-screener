@@ -26,7 +26,7 @@ dev = [
     "pandas-stubs>=2.2",
 ]
 
-# wheel 只打包新系統；舊 src/*.py 明確排除在外（ADR-0001 DEC-002）
+# wheel 只打包新系統；legacy 新聞爬蟲已依 ADR-0002 移除
 [tool.hatch.build.targets.wheel]
 packages = ["src/hotstock"]
 
@@ -35,8 +35,7 @@ packages = ["src/hotstock"]
 # 品質工具設定
 #
 # 掃描範圍一律只含新系統（src/hotstock、tests）。
-# 舊 src/*.py、run_news.py 依 ADR-0001 DEC-002 不屬新主線，
-# 不掃描、不格式化、不修正、不測試，也不為其加任何 ignore。
+# legacy 新聞爬蟲已依 ADR-0002 移除；歷史稽核文件不納入程式掃描。
 # ============================================================
 
 [tool.ruff]

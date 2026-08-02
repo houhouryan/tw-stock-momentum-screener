@@ -45,17 +45,17 @@
 | DB migration（11 表） | ⬜ 尚未建立，B0-R07～R09 |
 | Raw repository、run state、config hash | ⬜ 尚未建立，B0-R10～R12 |
 
-### ⚠️ 關於 repo 內的舊檔案
+### Legacy 新聞爬蟲已移除
 
-`src/db.py`、`src/sources.py`、`src/pipeline.py`、`run_news.py`、`requirements.txt`、`config/sources.yaml` 是**新系統定案前**遺留的新聞擷取工具。
+專案經理已於 2026-08-02 明確授權，依 [ADR-0002](docs/adr/ADR-0002-移除legacy新聞爬蟲.md) 從 `feature/b0-skeleton` 刪除舊新聞爬蟲的程式、專用設定與專用依賴清單。
 
 | 規則 | 說明 |
 |---|---|
-| **不屬新系統** | 依 [ADR-0001 DEC-002](docs/adr/ADR-0001-B0基線決策.md)，完全不在新主線範圍 |
-| **不得 import** | `src/hotstock/` 內**任何模組都不得 import** 這些檔案 |
-| **不執行、不遷移、不測試** | 不加入依賴，不為其補 lint／型別／測試 |
-| **不刪除** | 依 DEC-003 原樣保留，除非專案經理另行授權 |
-| **品質工具不掃描** | `scripts/check.sh` 只涵蓋新 package、正式 tests 與必要 scripts |
+| **新系統唯一 package** | repository 內的 application package 只使用 `src/hotstock/` |
+| **歷史仍可追溯** | 舊實作保留於 Git 歷史 commit `272e13f`，既有報告與 ADR 不覆寫 |
+| **資料未刪除** | 本次不刪除任何未追蹤的資料庫、擷取資料或日誌 |
+| **分支影響** | feature branch 的刪除只有 merge 或明確挑入相關 commit 後才會影響整合／主分支 |
+| **未來新聞功能** | 必須依 SDD 與新系統契約另開輪次，不得復接 legacy 程式 |
 
 新聞在 SDD 中的定位是 **D-news 探索性展示**，明確**不阻塞 P0**，且「沒有合法來源是允許結果」（SDD §1.2、§16.5）。
 
@@ -121,9 +121,9 @@ uv run python -c "import hotstock; print(hotstock.__version__)"
 ./scripts/check.sh
 ```
 
-單一入口，依序執行 lockfile 漂移 → shell 語法 → format → lint → 型別 → 測試。**任一步驟失敗即以非零結束。** 只檢查新系統（`src/hotstock`、`tests`），不掃描舊檔案。此腳本只做檢查，不會自動修改任何檔案。
+單一入口，依序執行 lockfile 漂移 → shell 語法 → format → lint → 型別 → 測試。**任一步驟失敗即以非零結束。** 檢查範圍是新系統（`src/hotstock`、`tests`）。此腳本只做檢查，不會自動修改任何檔案。
 
-> **依賴唯一來源是 `pyproject.toml` + `uv.lock`**（[ADR-0001 DEC-007](docs/adr/ADR-0001-B0基線決策.md)）。不要用 `pip install`，也不要讀 `requirements.txt`——後者只服務舊工具，不屬新系統。
+> **依賴唯一來源是 `pyproject.toml` + `uv.lock`**（[ADR-0001 DEC-007](docs/adr/ADR-0001-B0基線決策.md)）。legacy `requirements.txt` 已依 ADR-0002 移除。
 >
 > 修改依賴後須執行 `uv lock` 重新產生 lockfile，**不得手工編輯 `uv.lock`**。
 

@@ -2,8 +2,8 @@
 #
 # 品質 gate：唯一入口，任一步驟失敗即以非零結束。
 #
-# 掃描範圍只含新系統（src/hotstock、tests）。舊 src/*.py、run_news.py
-# 依 ADR-0001 DEC-002 不屬新主線，不在此檢查。
+# 掃描範圍只含新系統（src/hotstock、tests）。
+# legacy 新聞爬蟲已依 ADR-0002 移除。
 #
 # 本腳本只做檢查，不寫檔、不自動 format、不自動 fix。
 # 用法：./scripts/check.sh（可從任意 cwd 執行）
