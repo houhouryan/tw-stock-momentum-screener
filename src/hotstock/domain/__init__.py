@@ -8,6 +8,13 @@
 公開介面以 ``__all__`` 明確界定，未列出者視為內部實作，不保證穩定。
 """
 
+from hotstock.domain.acquisition import (
+    FetchRequest,
+    NormalizationIssue,
+    NormalizedBatch,
+    RawArtifact,
+    SourceHealth,
+)
 from hotstock.domain.enums import (
     DegradedMode,
     DisplayGrade,
@@ -30,16 +37,21 @@ __all__ = [
     "DegradedMode",
     "DisplayGrade",
     "ErrorCode",
+    "FetchRequest",
     "FillModel",
     "HotstockError",
     "LabelStatus",
     "Market",
     "ModelVariant",
+    "NormalizationIssue",
+    "NormalizedBatch",
     "PitGrade",
     "PitMetadata",
     "PitMode",
+    "RawArtifact",
     "ReturnOrigin",
     "RunOutcome",
     "RunPhase",
     "RunType",
+    "SourceHealth",
 ]
