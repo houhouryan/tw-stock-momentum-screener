@@ -72,7 +72,7 @@ SDD v0.2  >  有效 ADR  >  A／B 工作表  >  專案計畫書 v2.6.2（研究�
 | 文件 | 角色 |
 |---|---|
 | [SDD v0.2](docs/台股飆股候選偵測與續航評估系統_SDD_v0_2.md) | **實作契約，最高優先** |
-| [ADR](docs/adr/) | 已核准的決策紀錄；可修訂 SDD 個別條款，須明寫被修訂條號 |
+| [ADR](docs/adr/) | **已由專案經理核准**的決策紀錄；**工程師不得自行用 ADR 覆寫 SDD** |
 | [組員 A 工作表](docs/組員A_市場資料與研究工作表.md) | 市場資料與研究分工 |
 | [組員 B 工作表](docs/組員B_系統實驗與模型工作表.md) | 系統、實驗與模型分工 |
 | [專案計畫書 v2.6.2](docs/台股飆股候選偵測與續航評估系統_專案計畫書_v2_6_2.md) | 研究背景與動機 |
@@ -88,6 +88,7 @@ SDD v0.2  >  有效 ADR  >  A／B 工作表  >  專案計畫書 v2.6.2（研究�
 ### 決策流程
 
 - **沉默不是核准。** 不得使用「期限前沒有收到反對就視為核准」。
+- 工程師**可以撰寫 ADR 草案記錄問題**，但未經專案經理明確核准，**不得把草案當成有效的需求變更**。SDD v0.2 的優先序不因新增 ADR 而自動改變。
 - 會改變需求、資料契約、研究方法、成本、外部服務、時程或驗收標準的選擇，一律**停止該輪**並列為待決事項。
 - 純局部、可逆且不改公開契約的實作細節可自行提出方案，但仍須在工作報告說明。
 
@@ -106,10 +107,17 @@ SDD v0.2  >  有效 ADR  >  A／B 工作表  >  專案計畫書 v2.6.2（研究�
 ```bash
 git clone <repo-url> hotstock-tw
 cd hotstock-tw
-uv venv          # 依 .python-version 自動取用 Python 3.12
+uv sync --frozen                 # 依 uv.lock 建立環境，版本完全一致
+uv run python -c "import hotstock; print(hotstock.__version__)"
 ```
 
-> **⏳ B0-R01 前尚不可用：** `pyproject.toml` 目前只有專案 metadata，尚未加入任何依賴，也還沒有 `uv.lock`。`uv sync` 與 `uv run` 要等 B0-R01 完成後才能正常運作，屆時本節指令會經實測後更新。
+`uv sync --frozen` 會依 `.python-version` 取用 Python 3.12 並**嚴格照 `uv.lock` 安裝**，不重新解析版本，因此兩人環境完全一致。不需要手動 `uv venv`，也不需要 `activate`。
+
+驗證指令應輸出 `0.1.0`。
+
+> **依賴唯一來源是 `pyproject.toml` + `uv.lock`**（[ADR-0001 DEC-007](docs/adr/ADR-0001-B0基線決策.md)）。不要用 `pip install`，也不要讀 `requirements.txt`——後者只服務舊工具，不屬新系統。
+>
+> 修改依賴後須執行 `uv lock` 重新產生 lockfile，**不得手工編輯 `uv.lock`**。
 
 ### 產生的檔案（皆已 gitignore）
 

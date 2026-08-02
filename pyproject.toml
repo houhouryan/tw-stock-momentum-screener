@@ -1,5 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "hotstock-tw"
 version = "0.1.0"
-requires-python = ">=3.12"
-dependencies = []
+description = "台股飆股候選偵測與續航評估系統（研究工具，非自動交易系統）"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pydantic>=2.9",
+    "PyYAML>=6.0",
+    "requests>=2.32",
+    "typer>=0.12",
+    "numpy>=2.0",
+    "pandas>=2.2",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pytest>=8.3",
+    "types-PyYAML>=6.0",
+    "types-requests>=2.32",
+    "pandas-stubs>=2.2",
+]
+
+# wheel 只打包新系統；舊 src/*.py 明確排除在外（ADR-0001 DEC-002）
+[tool.hatch.build.targets.wheel]
+packages = ["src/hotstock"]
