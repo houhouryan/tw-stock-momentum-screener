@@ -5,3 +5,5 @@ run.bat
 __pycache__/
 *.pyc
 .env
+
+explore/raw_samples/

@@ -1,0 +1,175 @@
+# ============================================================
+# 市場資料來源設定（A0-01 / A0-02 用）
+#
+# 用途：source_probe.py 會逐一探測這裡列的端點，
+#       記錄回應狀態、欄位、原始樣本與取得時間。
+#
+# 重要觀念：
+#   - openapi.twse.com.tw  → 只有最新一日，沒有歷史查詢
+#   - www.twse.com.tw      → 有當日資料，且支援日期參數可查歷史
+#   兩者用途不同，都要登錄。
+#
+# verified 欄位：探測成功後由你手動改成 true，並填 verified_at
+# ============================================================
+
+# 對來源網站的禮貌設定
+user_agent: "Mozilla/5.0 (compatible; HOTSTOCK-TW academic project)"
+timeout_seconds: 30
+delay_between_requests_seconds: 5   # 證交所無明文限制，5 秒為保守值
+retries: 2
+retry_backoff_seconds: 15
+
+sources:
+
+  # ==========================================================
+  # TWSE（上市）— OpenAPI：只有最新一日
+  # ==========================================================
+  - id: twse_openapi_stock_day_all
+    name: "臺灣證券交易所"
+    group: twse_openapi
+    dataset: "個股日成交資訊（全市場，最新一日）"
+    method: GET
+    url: "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+    params: {}
+    format: json
+    history_capable: false          # 關鍵：無歷史
+    license: "政府資料開放授權條款-第1版"
+    license_url: "https://data.gov.tw/license"
+    cost: free
+    expected_fields: ["Code", "Name", "TradeVolume", "TradeValue", "OpeningPrice", "HighestPrice", "LowestPrice", "ClosingPrice", "Change", "Transaction"]
+    verified: false
+    verified_at: null
+    notes: "每日快照主力來源。嚴格 PIT 自本專案開始擷取之日起算。"
+
+  - id: twse_openapi_t86
+    name: "臺灣證券交易所"
+    group: twse_openapi
+    dataset: "三大法人買賣超日報（個股，最新一日）"
+    method: GET
+    url: "https://openapi.twse.com.tw/v1/fund/T86"
+    params: {}
+    format: json
+    history_capable: false
+    license: "政府資料開放授權條款-第1版"
+    license_url: "https://data.gov.tw/license"
+    cost: free
+    expected_fields: []             # 探測後填入
+    verified: false
+    verified_at: null
+    notes: "C01/C02 訊號來源。須確認公布時間（影響 21:25 擷取截止）。"
+
+  - id: twse_openapi_bwibbu_all
+    name: "臺灣證券交易所"
+    group: twse_openapi
+    dataset: "個股本益比、殖利率、股價淨值比（最新一日）"
+    method: GET
+    url: "https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL"
+    params: {}
+    format: json
+    history_capable: false
+    license: "政府資料開放授權條款-第1版"
+    license_url: "https://data.gov.tw/license"
+    cost: free
+    expected_fields: []
+    verified: false
+    verified_at: null
+    notes: "可用於反推市值與已發行股數（A0-04 關鍵）。"
+
+  # ==========================================================
+  # TWSE（上市）— 官網端點：支援日期參數，可查歷史
+  # ==========================================================
+  - id: twse_web_stock_day_all
+    name: "臺灣證券交易所"
+    group: twse_web
+    dataset: "個股日成交資訊（全市場，CSV，當日）"
+    method: GET
+    url: "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL"
+    params:
+      response: open_data
+    format: csv
+    history_capable: false
+    license: "政府資料開放授權條款-第1版"
+    license_url: "https://data.gov.tw/license"
+    cost: free
+    expected_fields: []
+    verified: false
+    verified_at: null
+    notes: "data.gov.tw 登錄的正式下載網址。與 OpenAPI 版本比對可驗證一致性。"
+
+  - id: twse_web_stock_day_single
+    name: "臺灣證券交易所"
+    group: twse_web
+    dataset: "個股日成交資訊（單檔單月，可查歷史）"
+    method: GET
+    url: "https://www.twse.com.tw/exchangeReport/STOCK_DAY"
+    params:
+      response: json
+      date: "20260701"              # 探測用，實際使用時由程式帶入
+      stockNo: "2330"
+    format: json
+    history_capable: true           # 唯一能查歷史的價量端點
+    license: "政府資料開放授權條款-第1版"
+    license_url: "https://data.gov.tw/license"
+    cost: free
+    expected_fields: []
+    verified: false
+    verified_at: null
+    notes: |
+      關鍵限制：一次只回傳「一檔股票、一個月」。
+      1,800 檔 × 84 個月 ≈ 151,200 次請求，以 5 秒間隔計約需 8.7 天。
+      → 歷史回補不建議走此端點，改用第三方並標記為準 PIT。
+      → 但可用於抽樣驗證第三方資料的正確性（A0-02 的核心用途）。
+
+  - id: twse_web_t86_history
+    name: "臺灣證券交易所"
+    group: twse_web
+    dataset: "三大法人買賣超（全市場，可查歷史）"
+    method: GET
+    url: "https://www.twse.com.tw/fund/T86"
+    params:
+      response: json
+      date: "20260701"
+      selectType: ALL
+    format: json
+    history_capable: true
+    license: "政府資料開放授權條款-第1版"
+    license_url: "https://data.gov.tw/license"
+    cost: free
+    expected_fields: []
+    verified: false
+    verified_at: null
+    notes: |
+      比價量友善得多：一次一天、全市場。
+      1,700 個交易日 × 1 次 ≈ 1,700 次請求，以 5 秒間隔約 2.4 小時。
+      → 籌碼資料「可以」自建歷史，這是與價量的重大差異。
+
+  # ==========================================================
+  # TPEx（上櫃）
+  # ==========================================================
+  - id: tpex_openapi_daily
+    name: "證券櫃檯買賣中心"
+    group: tpex_openapi
+    dataset: "上櫃個股日收盤行情（最新一日）"
+    method: GET
+    url: "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes"
+    params: {}
+    format: json
+    history_capable: false
+    license: "待確認"               # ← 探測後補
+    license_url: null
+    cost: free
+    expected_fields: []
+    verified: false
+    verified_at: null
+    notes: "TPEx OpenAPI 首頁：https://www.tpex.org.tw/openapi/ ，須確認授權條款。"
+
+  # ==========================================================
+  # 待補來源（A0-01 尚須確認取得方式）
+  # ==========================================================
+  # - 終止上市/上櫃公司清單（A2-02 存活偏誤用，只需名單不需股價）
+  # - 除權息公告表（A2-03 還原價計算）
+  # - 已發行股數（A0-04 閘門）
+  # - 每日漲跌幅限制與特殊股票清單（A0-05 閘門）
+  # - 交易日曆（含臨時休市）
+  # - MOPS 重大訊息（A0-06）
+  # - 警示/處置/全額交割股名單（Universe 用）
