@@ -107,13 +107,21 @@ SDD v0.2  >  有效 ADR  >  A／B 工作表  >  專案計畫書 v2.6.2（研究�
 ```bash
 git clone <repo-url> hotstock-tw
 cd hotstock-tw
-uv sync --frozen                 # 依 uv.lock 建立環境，版本完全一致
+uv sync --frozen                 # 依既有 uv.lock 安裝，不重新解析版本
 uv run python -c "import hotstock; print(hotstock.__version__)"
 ```
 
-`uv sync --frozen` 會依 `.python-version` 取用 Python 3.12 並**嚴格照 `uv.lock` 安裝**，不重新解析版本，因此兩人環境完全一致。不需要手動 `uv venv`，也不需要 `activate`。
+`uv sync --frozen` 依既有 `uv.lock` 安裝，**不重新解析版本**。在相同平台與相容的 Python 3.12 環境下，可重現同一組鎖定依賴；**lockfile 不代表不同 OS、CPU 架構或 Python patch 版本的環境逐 byte 完全相同**。
 
-驗證指令應輸出 `0.1.0`。
+不需要手動 `uv venv`，也不需要 `activate`。驗證指令應輸出 `0.1.0`。
+
+### 品質檢查
+
+```bash
+./scripts/check.sh
+```
+
+單一入口，依序執行 lockfile 漂移 → shell 語法 → format → lint → 型別 → 測試。**任一步驟失敗即以非零結束。** 只檢查新系統（`src/hotstock`、`tests`），不掃描舊檔案。此腳本只做檢查，不會自動修改任何檔案。
 
 > **依賴唯一來源是 `pyproject.toml` + `uv.lock`**（[ADR-0001 DEC-007](docs/adr/ADR-0001-B0基線決策.md)）。不要用 `pip install`，也不要讀 `requirements.txt`——後者只服務舊工具，不屬新系統。
 >
