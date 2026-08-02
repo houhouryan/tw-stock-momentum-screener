@@ -163,6 +163,50 @@ sources:
     verified_at: null
     notes: "TPEx OpenAPI 首頁：https://www.tpex.org.tw/openapi/ ，須確認授權條款。"
 
+  - id: twse_isin_listed
+    name: "臺灣證券交易所"
+    group: isin
+    dataset: "上市有價證券代號及名稱（含 CFICode 證券類別）"
+    method: GET
+    url: "https://isin.twse.com.tw/isin/C_public.jsp"
+    params: 
+      strMode: 2
+    format: html
+    history_capable: false
+    license: "待確認（頁面未載明授權條款）"
+    license_url: null
+    cost: free
+    expected_fields: ["有價證券代號及名稱", "國際證券辨識號碼(ISIN Code)", "上市日", "市場別", "產業別", "CFICode", "備註"]
+    verified: false
+    verified_at: null
+    notes: |
+      編碼為 Big5，需 response.encoding = 'big5'。
+      需 BeautifulSoup 解析 HTML 表格。
+      CFICode 前兩碼 ES = 普通股，用於 Universe 過濾。
+      限制：僅有現況，無歷史版本 → 重建歷史 Universe 屬回顧式分類。
+
+  - id: twse_isin_otc
+    name: "臺灣證券交易所"
+    group: isin
+    dataset: "上櫃有價證券代號及名稱（含 CFICode 證券類別）"
+    method: GET
+    url: "https://isin.twse.com.tw/isin/C_public.jsp"
+    params: 
+      strMode: 4
+    format: html
+    history_capable: false
+    license: "待確認（頁面未載明授權條款）"
+    license_url: null
+    cost: free
+    expected_fields: ["有價證券代號及名稱", "國際證券辨識號碼(ISIN Code)", "上市日", "市場別", "產業別", "CFICode", "備註"]
+    verified: false
+    verified_at: null
+    notes: |
+      編碼為 Big5，需 response.encoding = 'big5'。
+      需 BeautifulSoup 解析 HTML 表格。
+      CFICode 前兩碼 ES = 普通股，用於 Universe 過濾。
+      限制：僅有現況，無歷史版本 → 重建歷史 Universe 屬回顧式分類。
+
   # ==========================================================
   # 待補來源（A0-01 尚須確認取得方式）
   # ==========================================================

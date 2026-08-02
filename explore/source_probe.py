@@ -14,7 +14,7 @@
   python explore/source_probe.py              # 探測全部
   python explore/source_probe.py twse_openapi # 只探測某個 group
 """
-
+from bs4 import BeautifulSoup
 import hashlib
 import json
 import sys
@@ -90,7 +90,7 @@ def probe_one(source: dict, cfg: dict) -> dict:
             # ---- 原始內容落地（Raw 層，永不修改）----
             RAW_DIR.mkdir(parents=True, exist_ok=True)
             stamp = now_tpe().strftime("%Y%m%d_%H%M%S")
-            ext = "json" if source.get("format") == "json" else "csv"
+            ext = {"json": "json", "csv": "csv", "html": "html"}.get(source.get("format"), "txt")
             raw_path = RAW_DIR / f"{source['id']}_{stamp}.{ext}"
             raw_path.write_bytes(resp.content)
             result["raw_file"] = str(raw_path.relative_to(ROOT))
@@ -115,6 +115,17 @@ def probe_one(source: dict, cfg: dict) -> dict:
                     if isinstance(first, dict) and not result["fields"]:
                         result["fields"] = list(first.keys())
                     result["sample_record"] = first
+
+            elif source.get("format") == "html":
+                soup = BeautifulSoup(resp.content.decode("big5", errors="replace"), "html.parser")
+                table = soup.find("table", {"class": "h4"})   # 這個頁面的表格 class 是 h4
+                rows = table.find_all("tr")
+                cells = rows[0].find_all("td")                # 第一列的儲存格
+                result["fields"] = [c.text.strip() for c in cells]
+                result["record_count"] = len(rows) - 1        # 扣掉標題列
+                if len(rows) > 1:
+                    result["sample_record"] = [c.text.strip() for c in rows[1].find_all("td")]
+
             else:
                 # CSV：只取前三行看結構
                 text = resp.content.decode("utf-8-sig", errors="replace")
