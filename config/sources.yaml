@@ -1,0 +1,32 @@
+# 新聞來源設定檔
+# 新增來源只要在 sources 底下加一段，程式不用改（FR-D03 Adapter 化）
+
+user_agent: "Mozilla/5.0 (compatible; StockResearchBot/1.0; academic project)"
+timeout_seconds: 20
+retries: 3
+retry_backoff_seconds: 10
+delay_between_sources_seconds: 5
+
+sources:
+  # ===== Yahoo 股市 RSS =====
+  # 條款：個人與非營利組織可在非商業用途免費使用，須註明來源為「Yahoo股市」
+  # source_name 欄位就是用來滿足這個標示要求，請勿修改
+  - id: yahoo_tw_market
+    name: "Yahoo股市"
+    type: rss
+    url: "https://tw.stock.yahoo.com/rss?category=tw-market"
+    enabled: true
+
+  # 想加個股專屬 RSS 時，複製上面格式改 url 即可，例如：
+  # - id: yahoo_stock_2330
+  #   name: "Yahoo股市"
+  #   type: rss
+  #   url: "https://tw.stock.yahoo.com/rss?s=2330"
+  #   enabled: true
+
+  # ===== 待評估來源（M0 期間確認 robots.txt 與使用條款後再開啟）=====
+  # - id: cnyes_tw_stock
+  #   name: "鉅亨網"
+  #   type: html          # 需另外實作 HtmlSource adapter
+  #   url: "https://news.cnyes.com/news/cat/tw_stock_news"
+  #   enabled: false
