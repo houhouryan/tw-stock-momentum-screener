@@ -569,8 +569,12 @@ def test_five_models_exported_from_domain() -> None:
         assert name in domain.__all__
 
 
-def test_domain_all_preserves_existing_and_adds_exactly_five() -> None:
-    """__all__ 保留全部既有名稱且恰新增五個。"""
+def test_domain_all_preserves_existing_and_includes_acquisition_exports() -> None:
+    """__all__ 必須保留 acquisition 之前的名稱，並包含 acquisition 五個 export。
+
+    只斷言兩組明確集合是子集，不斷言全集相等或固定總數——後續輪次新增
+    合法 export 是預期行為，不應讓本測試失敗。
+    """
     from hotstock import domain
 
     existing = {
@@ -600,8 +604,8 @@ def test_domain_all_preserves_existing_and_adds_exactly_five() -> None:
     }
     actual = set(domain.__all__)
     assert existing <= actual
-    assert actual - existing == added
-    assert len(domain.__all__) == len(existing) + len(added) == 21
+    assert added <= actual
+    assert len(domain.__all__) == len(actual)
 
 
 def test_acquisition_all_lists_only_five_models() -> None:

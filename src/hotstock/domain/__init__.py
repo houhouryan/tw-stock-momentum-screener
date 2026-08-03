@@ -31,6 +31,13 @@ from hotstock.domain.enums import (
 )
 from hotstock.domain.errors import ErrorCode, HotstockError
 from hotstock.domain.models import PROJECT_TIMEZONE, PitMetadata
+from hotstock.domain.research import (
+    LabelFrame,
+    SignalFrame,
+    SignalResult,
+    UniverseExclusion,
+    UniverseResult,
+)
 
 __all__ = [
     "PROJECT_TIMEZONE",
@@ -40,6 +47,7 @@ __all__ = [
     "FetchRequest",
     "FillModel",
     "HotstockError",
+    "LabelFrame",
     "LabelStatus",
     "Market",
     "ModelVariant",
@@ -53,5 +61,9 @@ __all__ = [
     "RunOutcome",
     "RunPhase",
     "RunType",
+    "SignalFrame",
+    "SignalResult",
     "SourceHealth",
+    "UniverseExclusion",
+    "UniverseResult",
 ]
