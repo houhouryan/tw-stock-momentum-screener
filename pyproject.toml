@@ -63,9 +63,17 @@ disallow_incomplete_defs = true
 no_implicit_optional = true
 strict_equality = true
 
-# 核心契約層採 strict；模組於後續輪次建立時自動生效。
+# 核心契約、來源邊界與 data layer 採 strict；模組於後續輪次建立時自動生效。
+# 來源邊界處理時間、hash、lineage 與錯誤分類，是 PIT 邊界，標準不得低於 domain。
 [[tool.mypy.overrides]]
-module = ["hotstock.domain", "hotstock.domain.*", "hotstock.data", "hotstock.data.*"]
+module = [
+    "hotstock.domain",
+    "hotstock.domain.*",
+    "hotstock.adapters",
+    "hotstock.adapters.*",
+    "hotstock.data",
+    "hotstock.data.*",
+]
 strict = true
 
 [tool.pytest.ini_options]

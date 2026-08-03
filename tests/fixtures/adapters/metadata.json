@@ -1,0 +1,38 @@
+{
+  "source_id": "FIXTURE-OFFLINE",
+  "dataset_id": "FIXTURE-DAILY-QUOTE",
+  "request_json": {
+    "as_of_date": "2026-08-03",
+    "market": "FIXTURE",
+    "mode": "offline-fixture"
+  },
+  "health": {
+    "checked_at": "2026-08-03T09:35:00+08:00",
+    "evidence": {
+      "fixture_kind": "offline",
+      "network_required": false
+    }
+  },
+  "artifacts": {
+    "valid.json": {
+      "artifact_id": "3f0a1c62-6d3b-4a17-9d4e-1b2c3d4e5f60",
+      "license_snapshot_id": "8c1d2e3f-4a5b-4c6d-8e7f-90a1b2c3d4e5",
+      "source_run_id": "5b7e9a04-2c11-4d3e-9f80-6a5b4c3d2e1f",
+      "retrieved_at": "2026-08-03T09:30:00+08:00",
+      "http_status": 200,
+      "mime_type": "application/json",
+      "raw_uri": "fixture://adapters/valid.json",
+      "retry_count": 0
+    },
+    "malformed.json": {
+      "artifact_id": "a1b2c3d4-e5f6-4708-9a1b-2c3d4e5f6071",
+      "license_snapshot_id": "8c1d2e3f-4a5b-4c6d-8e7f-90a1b2c3d4e5",
+      "source_run_id": "5b7e9a04-2c11-4d3e-9f80-6a5b4c3d2e1f",
+      "retrieved_at": "2026-08-03T09:31:00+08:00",
+      "http_status": 200,
+      "mime_type": "application/json",
+      "raw_uri": "fixture://adapters/malformed.json",
+      "retry_count": 1
+    }
+  }
+}

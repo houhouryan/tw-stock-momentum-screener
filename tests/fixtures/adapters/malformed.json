@@ -1,0 +1,6 @@
+{
+  "dataset_id": "FIXTURE-DAILY-QUOTE",
+  "rows": [
+    {
+      "security_id": "SEC-0000000001",
+      "close": 101.5,

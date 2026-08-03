@@ -1,0 +1,18 @@
+{
+  "dataset_id": "FIXTURE-DAILY-QUOTE",
+  "as_of_date": "2026-08-03",
+  "rows": [
+    {
+      "security_id": "SEC-0000000001",
+      "close": 101.5,
+      "volume": 12345,
+      "limit_up": true
+    },
+    {
+      "security_id": "SEC-0000000002",
+      "close": 98.25,
+      "volume": 6789,
+      "limit_up": false
+    }
+  ]
+}
